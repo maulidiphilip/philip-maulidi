@@ -279,10 +279,10 @@ export default function ProjectsPage() {
         >
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-white max-w-4xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Let's Build Something Amazing Together
+              Let&apos;s Build Something Amazing Together
             </h2>
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Have a project in mind? I'd love to help bring your ideas to life with modern technology and educational insight.
+              Have a project in mind? I&apos;d love to help bring your ideas to life with modern technology and educational insight.
             </p>
             <a
               href="/contact"

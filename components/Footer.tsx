@@ -87,7 +87,7 @@ export default function Footer() {
               </div>
               <p className="text-slate-300 mb-4">
                 Fullstack Software Engineer &amp; Educator passionate about creating innovative solutions 
-                that bridge technology and education. Let's build something amazing together.
+                that bridge technology and education. Let&apos;s build something amazing together.
               </p>
               <div className="flex items-center text-slate-300 mb-2">
                 <MapPin className="w-4 h-4 mr-2" />
@@ -202,7 +202,7 @@ export default function Footer() {
               
               <div className="flex items-center space-x-6">
                 <p className="text-slate-500 text-xs mt-1">
-                  &copy; {currentYear} Philip Maulidi. All rights reserved. Let's create something amazing together.
+                  &copy; {currentYear} Philip Maulidi. All rights reserved. Let&apos;s create something amazing together.
                 </p>
                 <motion.button
                   onClick={scrollToTop}
