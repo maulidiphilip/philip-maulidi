@@ -1,9 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, Download, Github, Linkedin, Mail, MapPin, Code, Palette, Zap } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { ArrowRight, Github, Linkedin, Mail, Code, Palette, Zap } from "lucide-react";
 
 export default function HomePage() {
   const fadeInUp = {
@@ -53,7 +51,7 @@ export default function HomePage() {
                   transition={{ duration: 0.5 }}
                   className="inline-block px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium"
                 >
-                  👋 Hello, I'm Philip Maulidi
+                  👋 Hello, I&apos;m Philip Maulidi
                 </motion.div>
                 
                 <h1 className="text-5xl md:text-7xl font-bold leading-tight">
@@ -244,7 +242,7 @@ export default function HomePage() {
               Ready to Build Something Amazing?
             </h2>
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
-              Let's collaborate to bring your ideas to life with cutting-edge technology and educational expertise.
+              Let&apos;s collaborate to bring your ideas to life with cutting-edge technology and educational expertise.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

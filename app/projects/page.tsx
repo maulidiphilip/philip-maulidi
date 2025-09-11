@@ -2,8 +2,18 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { ExternalLink, Github, Filter, Search } from "lucide-react";
-import Image from "next/image";
+import { 
+  Search, 
+  Filter, 
+  ExternalLink, 
+  Github, 
+  Calendar,
+  Tag,
+  ArrowRight,
+  Code,
+  Palette,
+  Smartphone
+} from "lucide-react";
 
 export default function ProjectsPage() {
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -122,7 +132,8 @@ export default function ProjectsPage() {
             My Projects
           </h1>
           <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
-            Showcasing innovative solutions that blend education and technology
+            I&apos;m always working on exciting projects that push the boundaries of technology and education. 
+            Here&apos;s a showcase of my recent work, ranging from web applications to educational tools.
           </p>
         </motion.div>
 

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Calendar, Clock, User, Tag, Search, ArrowRight } from "lucide-react";
+import { Calendar, Clock, Search, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function BlogPage() {

@@ -67,7 +67,7 @@ export default function AboutPage() {
                   My Journey
                 </h2>
                 <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-                  I'm a passionate Fullstack Software Engineer with a unique foundation in education, 
+                  I&apos;m a passionate Fullstack Software Engineer with a unique foundation in education, 
                   holding a Bachelor of Education from the University of Malawi Chancellor College. 
                   This educational background has shaped my approach to software development, 
                   emphasizing clear communication, systematic problem-solving, and user-centered design.

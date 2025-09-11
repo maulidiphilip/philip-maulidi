@@ -5,8 +5,9 @@ export default function Contact() {
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-slate-800 dark:text-white mb-4">Let's Work Together</h2>
           <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 mx-auto mb-6"></div>
-          <p className="text-xl text-slate-600 dark:text-slate-300">
-            Ready to bring your ideas to life? Let's discuss your next project.
+          <p className="text-slate-600 dark:text-slate-300 mb-8 text-center max-w-2xl mx-auto">
+            Ready to start your next project? I&apos;d love to hear from you! Whether it&apos;s a web application, 
+            mobile app, or educational technology solution, let&apos;s create something amazing together.
           </p>
         </div>
         <div className="grid md:grid-cols-2 gap-12">
@@ -44,10 +45,11 @@ export default function Contact() {
           </div>
           <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 rounded-2xl text-white">
             <h3 className="text-2xl font-semibold mb-6">Ready to Start?</h3>
-            <p className="mb-6">
-              I'm always excited to work on new projects and collaborate with amazing people. 
-              Whether you need a full-stack web application, a modern frontend, or technical consultation, 
-              I'm here to help bring your vision to life.
+            <p className="text-slate-600 dark:text-slate-300 mb-4">
+              I&apos;m always excited to discuss new projects and opportunities.
+            </p>
+            <p className="text-slate-600 dark:text-slate-300">
+              Let&apos;s turn your ideas into reality!
             </p>
             <button className="bg-white text-blue-600 px-6 py-3 rounded-full font-semibold hover:bg-slate-100 transition-colors">
               Start a Conversation

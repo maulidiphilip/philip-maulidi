@@ -135,9 +135,8 @@ export default function ContactPage() {
                 Get in Touch
               </h2>
               <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
-                I'm always excited to work on new projects and collaborate with amazing people. 
-                Whether you need a full-stack web application, educational technology solution, 
-                or technical consultation, I'm here to help.
+                I'd love to hear from you! Whether you have a project in mind, need technical consultation, 
+                or just want to connect, don't hesitate to reach out.
               </p>
             </div>
 

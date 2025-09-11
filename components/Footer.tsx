@@ -82,20 +82,20 @@ export default function Footer() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">Philip Maulidi</h3>
-                  <p className="text-slate-400 text-sm">Fullstack Engineer & Educator</p>
+                  <p className="text-slate-400 text-sm">Fullstack Software Engineer & Educator</p>
                 </div>
               </div>
-              <p className="text-slate-300 mb-6 leading-relaxed">
-                Passionate about creating innovative solutions that bridge education and technology. 
-                Building the future, one line of code at a time.
+              <p className="text-slate-300 mb-4">
+                Fullstack Software Engineer & Educator passionate about creating innovative solutions 
+                that bridge technology and education. Let&apos;s build something amazing together.
               </p>
-              <div className="flex items-center space-x-2 text-slate-400 mb-2">
-                <MapPin className="w-4 h-4" />
-                <span className="text-sm">Zomba, Malawi</span>
+              <div className="flex items-center text-slate-300 mb-2">
+                <MapPin className="w-4 h-4 mr-2" />
+                <span>Zomba, Malawi</span>
               </div>
-              <div className="flex items-center space-x-2 text-slate-400">
-                <Phone className="w-4 h-4" />
-                <span className="text-sm">+265 991 103 578</span>
+              <div className="flex items-center text-slate-300">
+                <Phone className="w-4 h-4 mr-2" />
+                <span>+265 991 103 578</span>
               </div>
             </motion.div>
 

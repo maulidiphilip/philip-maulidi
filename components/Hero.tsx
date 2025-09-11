@@ -18,8 +18,10 @@ export default function Hero() {
           <h1 className="text-5xl md:text-7xl font-bold text-slate-800 dark:text-white mb-6">
             Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Philip Maulidi</span>
           </h1>
-          <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 mb-8 max-w-3xl mx-auto">
-            Fullstack Software Engineer passionate about creating innovative web solutions
+          <p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+            I&apos;m a passionate Fullstack Software Engineer with a unique background in education. 
+            I create innovative solutions that bridge technology and learning, making complex concepts 
+            accessible and engaging for everyone.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-semibold transition-colors">

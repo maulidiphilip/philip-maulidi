@@ -12,7 +12,7 @@ export default function About() {
               Passionate Fullstack Developer
             </h3>
             <p className="text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-              I'm a dedicated Fullstack Software Engineer with a unique background in education, 
+              I&apos;m a dedicated Fullstack Software Engineer with a unique background in education, 
               holding a Bachelor of Education from the prestigious University of Malawi Chancellor College. 
               This educational foundation has given me exceptional communication skills and a deep 
               understanding of how to break down complex problems into manageable solutions.
