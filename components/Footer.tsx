@@ -87,7 +87,7 @@ export default function Footer() {
               </div>
               <p className="text-slate-300 mb-4">
                 Fullstack Software Engineer &amp; Educator passionate about creating innovative solutions 
-                that bridge technology and education. Let&apos;s build something amazing together.
+                that bridge technology and education. Lets build something amazing together.
               </p>
               <div className="flex items-center text-slate-300 mb-2">
                 <MapPin className="w-4 h-4 mr-2" />
@@ -158,9 +158,9 @@ export default function Footer() {
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <h4 className="text-lg font-semibold mb-6">Let's Connect</h4>
+              <h4 className="text-lg font-semibold mb-6">Let&apos;s Connect</h4>
               <p className="text-slate-300 mb-6">
-                Ready to start your next project? Let's discuss how we can work together.
+                Ready to start your next project? Let&apos;s discuss how we can work together.
               </p>
               
               <div className="flex space-x-4 mb-6">
@@ -202,7 +202,7 @@ export default function Footer() {
               
               <div className="flex items-center space-x-6">
                 <p className="text-slate-500 text-xs mt-1">
-                  &copy; {currentYear} Philip Maulidi. All rights reserved. Let&apos;s create something amazing together.
+                  &copy; {currentYear} Philip Maulidi. All rights reserved. Lets create something amazing together.
                 </p>
                 <motion.button
                   onClick={scrollToTop}
