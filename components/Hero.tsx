@@ -19,7 +19,7 @@ export default function Hero() {
             Hi, I'm <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Philip Maulidi</span>
           </h1>
           <p className="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-            I&apos;m a passionate Fullstack Software Engineer with a unique background in education. 
+            I'm a passionate Fullstack Software Engineer with a unique background in education. 
             I create innovative solutions that bridge technology and learning, making complex concepts 
             accessible and engaging for everyone.
           </p>

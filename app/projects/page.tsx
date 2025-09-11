@@ -6,13 +6,7 @@ import {
   Search, 
   Filter, 
   ExternalLink, 
-  Github, 
-  Calendar,
-  Tag,
-  ArrowRight,
-  Code,
-  Palette,
-  Smartphone
+  Github
 } from "lucide-react";
 
 export default function ProjectsPage() {

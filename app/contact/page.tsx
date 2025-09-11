@@ -115,10 +115,10 @@ export default function ContactPage() {
           className="text-center mb-20"
         >
           <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-6">
-            Let's Connect
+            Let&apos;s Connect
           </h1>
           <p className="text-xl md:text-2xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
-            Ready to bring your ideas to life? Let's discuss how we can work together
+            Ready to bring your ideas to life? Let&apos;s discuss how we can work together
           </p>
         </motion.div>
 
@@ -135,8 +135,8 @@ export default function ContactPage() {
                 Get in Touch
               </h2>
               <p className="text-lg text-slate-600 dark:text-slate-300 mb-8">
-                I'd love to hear from you! Whether you have a project in mind, need technical consultation, 
-                or just want to connect, don't hesitate to reach out.
+                I&apos;d love to hear from you! Whether you have a project in mind, need technical consultation, 
+                or just want to connect, don&apos;t hesitate to reach out.
               </p>
             </div>
 
@@ -236,7 +236,7 @@ export default function ContactPage() {
                   <span className="font-medium">Message sent successfully!</span>
                 </div>
                 <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                  Thank you for reaching out. I'll get back to you soon.
+                  Thank you for reaching out. I&apos;ll get back to you soon.
                 </p>
               </motion.div>
             )}

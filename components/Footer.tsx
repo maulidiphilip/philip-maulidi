@@ -86,8 +86,8 @@ export default function Footer() {
                 </div>
               </div>
               <p className="text-slate-300 mb-4">
-                Fullstack Software Engineer & Educator passionate about creating innovative solutions 
-                that bridge technology and education. Let&apos;s build something amazing together.
+                Fullstack Software Engineer &amp; Educator passionate about creating innovative solutions 
+                that bridge technology and education. Let's build something amazing together.
               </p>
               <div className="flex items-center text-slate-300 mb-2">
                 <MapPin className="w-4 h-4 mr-2" />
@@ -197,13 +197,13 @@ export default function Footer() {
               <div className="flex items-center space-x-2 text-slate-400 mb-4 md:mb-0">
                 <span>&copy; {currentYear} Philip Maulidi. Made with</span>
                 <Heart className="w-4 h-4 text-red-500 animate-pulse" />
-                <span>in Malawi</span>
+                <span>in Malawi • Built with Next.js & Tailwind CSS</span>
               </div>
               
               <div className="flex items-center space-x-6">
-                <span className="text-slate-400 text-sm">
-                  Built with Next.js & Tailwind CSS
-                </span>
+                <p className="text-slate-500 text-xs mt-1">
+                  &copy; {currentYear} Philip Maulidi. All rights reserved. Let's create something amazing together.
+                </p>
                 <motion.button
                   onClick={scrollToTop}
                   whileHover={{ scale: 1.1 }}
