@@ -13,6 +13,7 @@ import {
   Calendar
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Project {
   id: string;
@@ -30,7 +31,6 @@ interface Project {
 }
 
 export default function AdminProjectsPage() {
-  const { isAdmin } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -316,11 +316,14 @@ export default function AdminProjectsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         {project.image && (
-                          <img
-                            src={project.image}
-                            alt={project.title}
-                            className="h-10 w-10 rounded-lg object-cover mr-4"
-                          />
+                          <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+                            <Image
+                              src={project.image}
+                              alt={project.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
                         )}
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">

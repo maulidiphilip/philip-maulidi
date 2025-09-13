@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Plus, X, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';

@@ -5,11 +5,12 @@ import { prisma } from '@/lib/database';
 // GET /api/blog/[id] - Get single blog post
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const post = await prisma.blogPost.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         author: {
           select: {
@@ -47,7 +48,7 @@ export async function GET(
 // PUT /api/blog/[id] - Update blog post (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
@@ -59,8 +60,9 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
     const body = await request.json();
-    const { title, content, excerpt, tags, featuredImage, published } = body;
+    const { title, content, excerpt, tags, image, published } = body;
 
     // Validate required fields
     if (!title || !content) {
@@ -71,13 +73,13 @@ export async function PUT(
     }
 
     const post = await prisma.blogPost.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title,
         content,
         excerpt: excerpt || '',
         tags: JSON.stringify(tags || []),
-        featuredImage: featuredImage || '',
+        image: image || '',
         published: published || false,
         updatedAt: new Date(),
       },
@@ -111,7 +113,7 @@ export async function PUT(
 // DELETE /api/blog/[id] - Delete blog post (Admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = await getCurrentUser();
@@ -123,8 +125,9 @@ export async function DELETE(
       );
     }
 
+    const { id } = await params;
     await prisma.blogPost.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Blog post deleted successfully' });

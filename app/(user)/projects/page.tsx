@@ -323,10 +323,8 @@ export default function ProjectsPage() {
                     // Try to parse as JSON first
                     technologies = JSON.parse(project.technologies || '[]');
                   } catch {
-                    // If JSON parsing fails, check if it's already an array or treat as comma-separated string
-                    if (Array.isArray(project.technologies)) {
-                      technologies = project.technologies;
-                    } else if (typeof project.technologies === 'string') {
+                    // If JSON parsing fails, treat as comma-separated string
+                    if (typeof project.technologies === 'string' && project.technologies.trim()) {
                       technologies = project.technologies.split(',').map(tech => tech.trim());
                     } else {
                       technologies = [];

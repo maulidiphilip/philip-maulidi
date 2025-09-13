@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { 
   ArrowLeft, 
   Edit, 
@@ -34,8 +33,7 @@ interface Project {
 }
 
 export default function AdminProjectDetailPage() {
-  const params = useParams();
-  const router = useRouter();
+  const params = useRouter();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -159,7 +157,7 @@ export default function AdminProjectDetailPage() {
       });
 
       if (response.ok) {
-        router.push('/admin/projects');
+        params.push('/admin/projects');
       } else {
         alert('Failed to delete project');
       }

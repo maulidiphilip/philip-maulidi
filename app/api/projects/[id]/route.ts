@@ -7,11 +7,12 @@ const prisma = new PrismaClient();
 // GET /api/projects/[id] - Get single project
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const project = await prisma.project.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         author: {
           select: {
@@ -62,7 +63,7 @@ export async function GET(
 // PUT /api/projects/[id] - Update project (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const token = request.cookies.get('auth-token')?.value;
@@ -86,9 +87,10 @@ export async function PUT(
       );
     }
 
+    const { id } = await params;
     // Check if project exists
     const existingProject = await prisma.project.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingProject) {
@@ -120,7 +122,7 @@ export async function PUT(
     }
 
     const updatedProject = await prisma.project.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title,
         description,
@@ -162,7 +164,7 @@ export async function PUT(
 // DELETE /api/projects/[id] - Delete project (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const token = request.cookies.get('auth-token')?.value;
@@ -186,9 +188,10 @@ export async function DELETE(
       );
     }
 
+    const { id } = await params;
     // Check if project exists
     const existingProject = await prisma.project.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!existingProject) {
@@ -199,7 +202,7 @@ export async function DELETE(
     }
 
     await prisma.project.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json(
