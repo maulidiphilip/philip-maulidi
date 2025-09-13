@@ -318,18 +318,11 @@ export default function ProjectsPage() {
             <div className="animate-fade-in-up animation-delay-400">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredProjects.map((project) => {
-                  let technologies: string[] = [];
-                  try {
-                    // Try to parse as JSON first
-                    technologies = JSON.parse(project.technologies || '[]');
-                  } catch {
-                    // If JSON parsing fails, treat as comma-separated string
-                    if (typeof project.technologies === 'string' && project.technologies.trim()) {
-                      technologies = project.technologies.split(',').map(tech => tech.trim());
-                    } else {
-                      technologies = [];
-                    }
-                  }
+                  // Technologies are already parsed by the API
+                  const technologies: string[] = Array.isArray(project.technologies) 
+                    ? project.technologies 
+                    : [];
+                  
                   return (
                     <Link
                       key={project.id}
