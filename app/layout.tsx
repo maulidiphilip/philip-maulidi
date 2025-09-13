@@ -1,9 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import { AuthProvider } from '../contexts/AuthContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +22,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Philip Maulidi - Fullstack Software Engineer & Educator",
     description: "Passionate Fullstack Software Engineer combining education expertise with modern web development",
-    url: "https://philip-maulidi.vercel.app",
+    url: "https://philip-maulidi-wqoz.vercel.app",
     siteName: "Philip Maulidi Portfolio",
     images: [
       {
@@ -58,20 +57,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-          </div>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
