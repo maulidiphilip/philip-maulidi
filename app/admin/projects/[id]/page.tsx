@@ -36,10 +36,8 @@ interface Project {
 export default function AdminProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { isAdmin } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -95,23 +93,22 @@ export default function AdminProjectDetailPage() {
             published: data.published,
           });
         } else {
-          setError('Project not found');
+          console.error('Project not found');
         }
       } catch (error) {
         console.error('Error fetching project:', error);
-        setError('Failed to load project');
       } finally {
         setLoading(false);
       }
     };
 
-    if (params.id && isAdmin) {
+    if (params.id) {
       fetchProject();
-    } else if (!isAdmin) {
-      setError('Access denied');
+    } else {
+      console.error('Access denied');
       setLoading(false);
     }
-  }, [params.id, isAdmin]);
+  }, [params.id]);
 
   const handleUpdate = async () => {
     try {
@@ -197,12 +194,12 @@ export default function AdminProjectDetailPage() {
     );
   }
 
-  if (error || !project) {
+  if (!project) {
     return (
       <div className="p-6">
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            {error || 'Project Not Found'}
+            Project Not Found
           </h1>
           <Link
             href="/admin/projects"

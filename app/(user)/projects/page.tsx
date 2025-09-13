@@ -51,8 +51,8 @@ export default function ProjectsPage() {
         const data = await response.json();
         setProjects(data);
       }
-    } catch (error) {
-      console.error('Error fetching projects:', error);
+    } catch {
+      console.error('Error fetching projects:');
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ export default function ProjectsPage() {
                 </span>
               </h1>
               <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-                A collection of projects I've built using modern technologies and best practices.
+                A collection of projects I&apos;ve built using modern technologies and best practices.
                 Each project represents a unique challenge and learning experience.
               </p>
             </div>
@@ -322,7 +322,7 @@ export default function ProjectsPage() {
                   try {
                     // Try to parse as JSON first
                     technologies = JSON.parse(project.technologies || '[]');
-                  } catch (error) {
+                  } catch {
                     // If JSON parsing fails, check if it's already an array or treat as comma-separated string
                     if (Array.isArray(project.technologies)) {
                       technologies = project.technologies;
@@ -474,8 +474,8 @@ export default function ProjectsPage() {
               Interested in Working Together?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              I'm always excited to take on new challenges and collaborate on innovative projects.
-              Let's discuss how we can bring your ideas to life.
+              I&apos;m always excited to take on new challenges and collaborate on innovative projects.
+              Let&apos;s discuss how we can bring your ideas to life.
             </p>
             <Link
               href="/contact"

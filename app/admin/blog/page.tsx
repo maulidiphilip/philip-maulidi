@@ -34,7 +34,6 @@ interface BlogPost {
 }
 
 export default function AdminBlog() {
-  const { isAdmin } = useAuth();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

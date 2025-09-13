@@ -16,7 +16,7 @@ import {
 import Link from 'next/link';
 
 export default function AdminDashboard() {
-  const { user, userData, isAdmin, loading } = useAuth();
+  const { user } = useAuth();
 
   const stats = [
     { 

@@ -9,7 +9,6 @@ import Image from 'next/image';
 
 export default function NewBlogPost() {
   const router = useRouter();
-  const { isAdmin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',

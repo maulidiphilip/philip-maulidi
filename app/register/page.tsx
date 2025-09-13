@@ -61,7 +61,7 @@ export default function Register() {
           </div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Create Account</h1>
           <p className="text-slate-600 dark:text-slate-300 mt-2">
-            Join Philip Maulidi's Portfolio
+            Join Philip Maulidi&apos;s Portfolio
           </p>
         </div>
 

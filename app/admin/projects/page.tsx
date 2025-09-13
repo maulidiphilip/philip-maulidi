@@ -10,8 +10,7 @@ import {
   ExternalLink,
   Github,
   Star,
-  Calendar,
-  Tag
+  Calendar
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -391,10 +390,17 @@ export default function AdminProjectsPage() {
                             setEditingProject(project);
                             setShowEditModal(true);
                             setFormData({
-                              ...project,
+                              title: project.title,
+                              description: project.description,
+                              content: project.content || '',
+                              image: project.image || '',
                               technologies: typeof project.technologies === 'string'
                                 ? JSON.parse(project.technologies || '[]')
-                                : project.technologies || []
+                                : project.technologies || [],
+                              githubUrl: project.githubUrl || '',
+                              liveUrl: project.liveUrl || '',
+                              featured: project.featured,
+                              published: project.published
                             });
                           }}
                           className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
