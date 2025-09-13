@@ -37,7 +37,7 @@ export async function GET(
       try {
         technologies = JSON.parse(project.technologies);
       } catch {
-        technologies = project.technologies.split(',').map(tech => tech.trim());
+        technologies = project.technologies.split(',').map((tech: string) => tech.trim());
       }
     } else if (Array.isArray(project.technologies)) {
       technologies = project.technologies;
