@@ -33,7 +33,8 @@ interface Project {
 }
 
 export default function AdminProjectDetailPage() {
-  const params = useRouter();
+  const params = useParams();
+  const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -157,7 +158,7 @@ export default function AdminProjectDetailPage() {
       });
 
       if (response.ok) {
-        params.push('/admin/projects');
+        router.push('/admin/projects');
       } else {
         alert('Failed to delete project');
       }
