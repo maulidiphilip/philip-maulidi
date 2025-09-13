@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Parse JSON strings back to arrays
-    const formattedPosts = posts.map((post: any) => ({
+    const formattedPosts = posts.map((post: typeof posts[0]) => ({
       ...post,
       tags: post.tags ? JSON.parse(post.tags) : [],
     }));
