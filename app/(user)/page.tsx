@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Linkedin, Mail, Download, ExternalLink } from "lucide-react";
+import { Github, Linkedin, Mail, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -17,7 +17,7 @@ export default function HomePage() {
                 <h1
                   className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight animate-fade-in-up animation-delay-200"
                 >
-                  Hi, I'm{' '}
+                  Hi, I&apos;m{' '}
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     Philip Maulidi
                   </span>

@@ -6,10 +6,8 @@ import {
   Calendar,
   Star,
   Code,
-  Filter,
   Search,
   ArrowRight,
-  Eye,
   Heart
 } from 'lucide-react';
 import Image from 'next/image';

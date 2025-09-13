@@ -45,8 +45,9 @@ export default function Login() {
         }
       }, 100);
       
-    } catch (error: any) {
-      setError(error.message || 'Failed to sign in');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -129,7 +130,7 @@ export default function Login() {
 
         <div className="mt-6 text-center space-y-4">
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
               Create one
             </Link>

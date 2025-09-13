@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { ArrowLeft, Github, ExternalLink, Calendar, Tag, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -22,10 +22,8 @@ interface Project {
 
 export default function ProjectDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -37,15 +35,13 @@ export default function ProjectDetailPage() {
           if (data.published) {
             setProject(data);
           } else {
-            setError('Project not found');
+            setLoading(false);
           }
         } else {
-          setError('Project not found');
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching project:', error);
-        setError('Failed to load project');
-      } finally {
+      } catch {
+        console.error('Error fetching project:');
         setLoading(false);
       }
     };
@@ -67,14 +63,14 @@ export default function ProjectDetailPage() {
     );
   }
 
-  if (error || !project) {
+  if (!project) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Project Not Found</h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              The project you're looking for doesn't exist or is not published.
+              The project you&apos;re looking for doesn&apos;t exist or is not published.
             </p>
             <Link
               href="/projects"
@@ -92,7 +88,7 @@ export default function ProjectDetailPage() {
   let technologies: string[] = [];
   try {
     technologies = JSON.parse(project.technologies || '[]');
-  } catch (error) {
+  } catch {
     if (Array.isArray(project.technologies)) {
       technologies = project.technologies;
     } else if (typeof project.technologies === 'string') {

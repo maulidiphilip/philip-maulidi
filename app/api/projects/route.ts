@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const published = searchParams.get('published');
     const featured = searchParams.get('featured');
     
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     
     // For public access, only show published projects
     if (published !== 'false') {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       if (typeof project.technologies === 'string') {
         try {
           technologies = JSON.parse(project.technologies);
-        } catch (error) {
+        } catch {
           technologies = project.technologies.split(',').map(tech => tech.trim());
         }
       } else if (Array.isArray(project.technologies)) {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
     });

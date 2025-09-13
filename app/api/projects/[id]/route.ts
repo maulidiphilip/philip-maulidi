@@ -35,7 +35,7 @@ export async function GET(
     if (typeof project.technologies === 'string') {
       try {
         technologies = JSON.parse(project.technologies);
-      } catch (error) {
+      } catch {
         technologies = project.technologies.split(',').map(tech => tech.trim());
       }
     } else if (Array.isArray(project.technologies)) {
@@ -50,8 +50,8 @@ export async function GET(
     };
 
     return NextResponse.json(projectWithParsedTech);
-  } catch (error) {
-    console.error('Error fetching project:', error);
+  } catch {
+    console.error('Error fetching project:');
     return NextResponse.json(
       { error: 'Failed to fetch project' },
       { status: 500 }
@@ -74,7 +74,7 @@ export async function PUT(
       );
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
     });
@@ -150,8 +150,8 @@ export async function PUT(
     };
 
     return NextResponse.json(projectWithParsedTech);
-  } catch (error) {
-    console.error('Error updating project:', error);
+  } catch {
+    console.error('Error updating project:');
     return NextResponse.json(
       { error: 'Failed to update project' },
       { status: 500 }
@@ -174,7 +174,7 @@ export async function DELETE(
       );
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
     });
@@ -206,8 +206,8 @@ export async function DELETE(
       { message: 'Project deleted successfully' },
       { status: 200 }
     );
-  } catch (error) {
-    console.error('Error deleting project:', error);
+  } catch {
+    console.error('Error deleting project:');
     return NextResponse.json(
       { error: 'Failed to delete project' },
       { status: 500 }

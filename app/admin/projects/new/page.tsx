@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, X, Upload, Star } from 'lucide-react';
+import { ArrowLeft, Plus, X, Star } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function NewProject() {
   const router = useRouter();
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -273,9 +274,11 @@ export default function NewProject() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {formData.images.map((image, index) => (
                   <div key={index} className="relative group">
-                    <img
+                    <Image
                       src={image}
                       alt={`Project image ${index + 1}`}
+                      width={200}
+                      height={150}
                       className="w-full h-32 object-cover rounded-lg"
                     />
                     <button

@@ -14,6 +14,7 @@ import {
   User
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface BlogPost {
   id: string;
@@ -33,7 +34,7 @@ interface BlogPost {
 }
 
 export default function AdminBlog() {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -257,10 +258,12 @@ export default function AdminBlog() {
                   {/* Featured Image */}
                   {post.featuredImage && (
                     <div className="ml-6">
-                      <img
+                      <Image
                         src={post.featuredImage}
                         alt={post.title}
-                        className="w-32 h-24 object-cover rounded-lg"
+                        width={128}
+                        height={96}
+                        className="object-cover rounded-lg"
                       />
                     </div>
                   )}

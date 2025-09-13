@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   Plus,
   Search,
-  Filter,
   Eye,
   Edit,
   Trash2,
@@ -32,7 +31,7 @@ interface Project {
 }
 
 export default function AdminProjectsPage() {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,8 +59,8 @@ export default function AdminProjectsPage() {
         const data = await response.json();
         setProjects(data);
       }
-    } catch (error) {
-      console.error('Error fetching projects:', error);
+    } catch {
+      console.error('Error fetching projects:');
     } finally {
       setLoading(false);
     }
@@ -103,8 +102,8 @@ export default function AdminProjectsPage() {
       } else {
         alert('Failed to delete project');
       }
-    } catch (error) {
-      console.error('Error deleting project:', error);
+    } catch {
+      console.error('Error deleting project:');
       alert('Error deleting project');
     }
   };
@@ -132,8 +131,8 @@ export default function AdminProjectsPage() {
         const updatedProject = await response.json();
         setProjects(projects.map(p => p.id === project.id ? updatedProject : p));
       }
-    } catch (error) {
-      console.error(`Error updating ${field}:`, error);
+    } catch {
+      console.error(`Error updating ${field}:`);
     }
   };
 
@@ -186,8 +185,8 @@ export default function AdminProjectsPage() {
       } else {
         alert('Failed to create project');
       }
-    } catch (error) {
-      console.error('Error creating project:', error);
+    } catch {
+      console.error('Error creating project:');
       alert('Error creating project');
     }
   };
@@ -219,8 +218,8 @@ export default function AdminProjectsPage() {
       } else {
         alert('Failed to update project');
       }
-    } catch (error) {
-      console.error('Error updating project:', error);
+    } catch {
+      console.error('Error updating project:');
       alert('Error updating project');
     }
   };
@@ -265,7 +264,7 @@ export default function AdminProjectsPage() {
         </div>
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as any)}
+          onChange={(e) => setStatusFilter(e.target.value as 'all' | 'published' | 'draft')}
           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
         >
           <option value="all">All Projects</option>
@@ -303,7 +302,7 @@ export default function AdminProjectsPage() {
                 try {
                   // Try to parse as JSON first
                   technologies = JSON.parse(project.technologies || '[]');
-                } catch (error) {
+                } catch {
                   // If JSON parsing fails, check if it's already an array or treat as comma-separated string
                   if (Array.isArray(project.technologies)) {
                     technologies = project.technologies;

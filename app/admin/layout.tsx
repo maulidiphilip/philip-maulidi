@@ -23,7 +23,7 @@ import Link from 'next/link';
 interface SidebarItem {
   name: string;
   href: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   badge?: string;
 }
 

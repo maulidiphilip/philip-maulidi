@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
     });
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       ).end(buffer);
     });
 
-    const result = uploadResponse as any;
+    const result = uploadResponse as { secure_url: string; public_id: string };
 
     return NextResponse.json({
       url: result.secure_url,

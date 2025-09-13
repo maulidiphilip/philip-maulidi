@@ -3,12 +3,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Plus, X, Upload, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Plus, X, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function NewBlogPost() {
   const router = useRouter();
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -149,9 +150,11 @@ export default function NewBlogPost() {
               />
               {formData.featuredImage && (
                 <div className="mt-3">
-                  <img
+                  <Image
                     src={formData.featuredImage}
                     alt="Featured image preview"
+                    width={400}
+                    height={200}
                     className="w-full max-w-md h-48 object-cover rounded-lg"
                   />
                 </div>

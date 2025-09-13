@@ -2,7 +2,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { 
-  BarChart3, 
   FileText, 
   FolderOpen, 
   Users, 
@@ -131,10 +130,10 @@ export default function AdminDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-              Welcome back, {user?.displayName || 'Admin'}! 👋
+              Welcome back, {user?.displayName || 'Admin'}! &#x1F44B;
             </h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
-              Here's what's happening with your portfolio today.
+              Here&apos;s what&apos;s happening with your portfolio today.
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex items-center space-x-2">
@@ -153,12 +152,12 @@ export default function AdminDashboard() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {stats.map((stat, index) => (
+        {stats.map((stat) => (
           <motion.div
             key={stat.title}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
+            transition={{ duration: 0.6 }}
             className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
@@ -200,7 +199,7 @@ export default function AdminDashboard() {
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {quickActions.map((action, index) => (
+          {quickActions.map((action) => (
             <Link
               key={action.title}
               href={action.href}

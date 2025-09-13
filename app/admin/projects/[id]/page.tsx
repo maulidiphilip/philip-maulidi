@@ -36,7 +36,7 @@ interface Project {
 export default function AdminProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
