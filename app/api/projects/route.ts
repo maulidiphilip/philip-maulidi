@@ -4,6 +4,28 @@ import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
+// Define types based on Prisma schema
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  content: string | null;
+  image: string | null;
+  technologies: string | null;
+  githubUrl: string | null;
+  liveUrl: string | null;
+  featured: boolean;
+  published: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  authorId: string;
+  author: {
+    id: string;
+    displayName: string;
+    email: string;
+  };
+}
+
 // GET /api/projects - Get all projects (public endpoint)
 export async function GET(request: NextRequest) {
   try {
@@ -39,7 +61,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Parse technologies JSON string
-    const projectsWithParsedTech = projects.map(project => {
+    const projectsWithParsedTech = projects.map((project: Project) => {
       let technologies: string[] = [];
       if (typeof project.technologies === 'string') {
         try {
@@ -118,10 +140,10 @@ export async function POST(request: NextRequest) {
         title,
         description,
         content: content || '',
-        image,
+        image: image || null,
         technologies: JSON.stringify(technologies || []),
-        githubUrl,
-        liveUrl,
+        githubUrl: githubUrl || null,
+        liveUrl: liveUrl || null,
         featured: featured || false,
         published: published || false,
         authorId: user.id,
