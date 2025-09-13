@@ -71,7 +71,7 @@ export default function AdminProjectDetailPage() {
           if (typeof data.technologies === 'string') {
             try {
               technologies = JSON.parse(data.technologies);
-            } catch (error) {
+            } catch (_error) {
               technologies = data.technologies.split(',').map((tech: string) => tech.trim());
             }
           } else if (Array.isArray(data.technologies)) {

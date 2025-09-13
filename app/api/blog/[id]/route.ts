@@ -5,10 +5,10 @@ import { prisma } from '@/lib/database';
 // GET /api/blog/[id] - Get single blog post
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
+    const { id } = params;
     const post = await prisma.blogPost.findUnique({
       where: { id },
       include: {
@@ -48,7 +48,7 @@ export async function GET(
 // PUT /api/blog/[id] - Update blog post (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const user = await getCurrentUser();
@@ -60,7 +60,7 @@ export async function PUT(
       );
     }
 
-    const { id } = await params;
+    const { id } = params;
     const body = await request.json();
     const { title, content, excerpt, tags, image, published } = body;
 
@@ -113,7 +113,7 @@ export async function PUT(
 // DELETE /api/blog/[id] - Delete blog post (Admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const user = await getCurrentUser();
@@ -125,7 +125,7 @@ export async function DELETE(
       );
     }
 
-    const { id } = await params;
+    const { id } = params;
     await prisma.blogPost.delete({
       where: { id },
     });
