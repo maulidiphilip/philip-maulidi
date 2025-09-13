@@ -44,24 +44,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      console.log('🔍 Checking authentication...');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🔍 Checking authentication...');
+      }
       const response = await fetch('/api/auth/me');
-      console.log('📡 Auth API response status:', response.status);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('📡 Auth API response status:', response.status);
+      }
       
       if (response.ok) {
         const userData = await response.json();
-        console.log('✅ Auth API returned user data:', userData);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('✅ Auth API returned user data:', userData);
+        }
         setUser(userData);
       } else {
-        console.log('❌ Auth API failed:', response.status);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('❌ Auth API failed:', response.status);
+        }
         setUser(null);
       }
     } catch (error) {
-      console.error('🚨 Auth check failed:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('🚨 Auth check failed:', error);
+      }
       setUser(null);
     } finally {
       setLoading(false);
-      console.log('🏁 Auth check completed, loading set to false');
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('🏁 Auth check completed, loading set to false');
+      }
     }
   };
 
@@ -78,7 +90,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const { user: userData, token } = await response.json();
-    console.log('🔐 Login successful, user data:', userData);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('🔐 Login successful, user data:', userData);
+    }
     Cookies.set('auth-token', token, { expires: 7 });
     setUser(userData);
     
@@ -98,13 +112,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const { user: userData, token } = await response.json();
-    console.log('📝 Registration successful, user data:', userData);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('📝 Registration successful, user data:', userData);
+    }
     Cookies.set('auth-token', token, { expires: 7 });
     setUser(userData);
   };
 
   const signOut = async () => {
-    console.log('👋 Signing out...');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('👋 Signing out...');
+    }
     Cookies.remove('auth-token');
     setUser(null);
   };
@@ -114,12 +132,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isAdmin = user?.role === 'ADMIN';
 
-  console.log('🔄 AuthContext state:', { 
-    user, 
-    userData: user, 
-    loading, 
-    isAdmin 
-  });
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('🔄 AuthContext state:', { 
+      user, 
+      userData: user, 
+      loading, 
+      isAdmin 
+    });
+  }
 
   return (
     <AuthContext.Provider value={{ 

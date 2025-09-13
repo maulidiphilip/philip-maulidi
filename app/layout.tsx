@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://philip-maulidi-wqoz.vercel.app'), // Added metadataBase
   title: "Philip Maulidi - Fullstack Software Engineer & Educator",
   description: "Portfolio of Philip Maulidi, a passionate Fullstack Software Engineer with a Bachelor of Education from University of Malawi Chancellor College. Specializing in modern web development technologies and educational technology solutions.",
   keywords: ["Fullstack Developer", "Software Engineer", "Web Development", "React", "Next.js", "TypeScript", "Educational Technology", "Malawi Developer"],

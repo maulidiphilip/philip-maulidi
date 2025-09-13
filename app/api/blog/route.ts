@@ -2,6 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/database';
 
+// Define type for BlogPost with included author, based on Prisma schema
+type BlogPostWithAuthor = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string;
+  image: string | null;
+  published: boolean;
+  featured: boolean;
+  tags: string; // JSON string as per Prisma schema
+  readTime: number | null;
+  createdAt: Date;
+  updatedAt: Date;
+  authorId: string;
+  author: {
+    id: string;
+    displayName: string | null;
+    email: string;
+  };
+};
+
 // GET /api/blog - Get all blog posts
 export async function GET(request: NextRequest) {
   try {
@@ -25,7 +47,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Parse JSON strings back to arrays
-    const formattedPosts = posts.map((post: typeof posts[0]) => ({
+    const formattedPosts = posts.map((post: BlogPostWithAuthor) => ({
       ...post,
       tags: post.tags ? JSON.parse(post.tags) : [],
     }));
@@ -53,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, content, excerpt, tags, featuredImage, published } = body;
+    const { title, content, excerpt, tags, image, published } = body; // Changed featuredImage to image
 
     // Validate required fields
     if (!title || !content) {
@@ -66,10 +88,11 @@ export async function POST(request: NextRequest) {
     const post = await prisma.blogPost.create({
       data: {
         title,
+        slug: title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now(), // Generate slug
         content,
         excerpt: excerpt || '',
         tags: JSON.stringify(tags || []),
-        featuredImage: featuredImage || '',
+        image: image || '', // Changed featuredImage to image
         published: published || false,
         authorId: user.id,
       },

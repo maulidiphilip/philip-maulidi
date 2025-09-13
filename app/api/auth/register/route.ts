@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createUser, generateToken } from '@/lib/auth';
 import { prisma } from '@/lib/database';
 
+// Define AuthUser type to match generateToken expectations
+interface AuthUser {
+  id: string;
+  email: string;
+  displayName: string;
+  role: string;
+  avatar: string | undefined;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password, displayName } = await request.json();
@@ -33,7 +42,17 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await createUser(email, password, displayName);
-    const token = generateToken(user);
+
+    // Transform user to match AuthUser type
+    const authUser: AuthUser = {
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      role: user.role,
+      avatar: user.avatar === null ? undefined : user.avatar, // Convert null to undefined
+    };
+
+    const token = generateToken(authUser);
 
     return NextResponse.json({
       user,
