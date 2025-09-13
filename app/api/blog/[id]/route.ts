@@ -3,14 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/database';
 
-type RouteContext = {
-  params: Promise<{ id: string }>;
-};
-
 // GET /api/blog/[id]
-export async function GET(request: NextRequest, context: RouteContext) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = await context.params;
+    const { id } = await params;
     const post = await prisma.blogPost.findUnique({
       where: { id },
       include: {
@@ -33,14 +32,17 @@ export async function GET(request: NextRequest, context: RouteContext) {
 }
 
 // PUT /api/blog/[id]
-export async function PUT(request: NextRequest, context: RouteContext) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await getCurrentUser();
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await context.params;
+    const { id } = await params;
     const body = await request.json();
     const { title, content, excerpt, tags, image, published } = body;
 
@@ -75,14 +77,17 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 }
 
 // DELETE /api/blog/[id]
-export async function DELETE(request: NextRequest, context: RouteContext) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await getCurrentUser();
     if (!user || user.role !== 'ADMIN') {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await context.params;
+    const { id } = await params;
     await prisma.blogPost.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Blog post deleted successfully' });
