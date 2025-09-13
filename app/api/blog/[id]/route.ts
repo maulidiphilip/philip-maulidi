@@ -4,13 +4,13 @@ import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/database';
 
 type RouteContext = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 // GET /api/blog/[id]
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params;
     const post = await prisma.blogPost.findUnique({
       where: { id },
       include: {
@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
     const body = await request.json();
     const { title, content, excerpt, tags, image, published } = body;
 
@@ -82,7 +82,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = context.params;
+    const { id } = await context.params;
     await prisma.blogPost.delete({ where: { id } });
 
     return NextResponse.json({ message: 'Blog post deleted successfully' });
