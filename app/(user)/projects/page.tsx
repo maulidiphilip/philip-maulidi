@@ -4,7 +4,6 @@ import {
   Github, 
   ExternalLink, 
   Calendar,
-  Star,
   Code,
   Search,
   ArrowRight,
@@ -38,7 +37,6 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTech, setSelectedTech] = useState<string>('');
-  const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -85,12 +83,9 @@ export default function ProjectsPage() {
                          project.description.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesTech = !selectedTech || projectTech.includes(selectedTech);
-    const matchesFeatured = !showFeaturedOnly || project.featured;
 
-    return matchesSearch && matchesTech && matchesFeatured;
+    return matchesSearch && matchesTech;
   });
-
-  const featuredProjects = projects.filter(project => project.featured);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -120,12 +115,6 @@ export default function ProjectsPage() {
                   </span>
                 </div>
                 <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg px-4 py-2 shadow-sm">
-                  <Star className="w-5 h-5 text-yellow-500 mr-2" />
-                  <span className="text-gray-700 dark:text-gray-300 font-medium">
-                    {featuredProjects.length} Featured
-                  </span>
-                </div>
-                <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg px-4 py-2 shadow-sm">
                   <Heart className="w-5 h-5 text-red-500 mr-2" />
                   <span className="text-gray-700 dark:text-gray-300 font-medium">
                     {allTechnologies.length} Technologies
@@ -137,133 +126,16 @@ export default function ProjectsPage() {
         </div>
       </section>
 
-      {/* Featured Projects */}
-      {featuredProjects.length > 0 && (
-        <section className="py-16 bg-white dark:bg-gray-800">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="animate-fade-in-up">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                  Featured Projects
-                </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                  Highlighting some of my most impactful and innovative work
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {featuredProjects.slice(0, 4).map((project, index) => (
-                <div 
-                  key={project.id} 
-                  className={`bg-white dark:bg-gray-900 rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 animate-fade-in-up ${
-                    index % 2 === 0 ? 'animation-delay-200' : 'animation-delay-400'
-                  }`}
-                >
-                  {/* Project Image */}
-                  <div className="relative h-64 bg-gradient-to-br from-blue-500 to-purple-600">
-                    {project.image ? (
-                      <Image
-                        src={project.image}
-                        alt={project.title}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <Code className="w-16 h-16 text-white opacity-80" />
-                      </div>
-                    )}
-                    
-                    {/* Featured badge */}
-                    <div className="absolute top-4 left-4">
-                      <span className="inline-flex items-center px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-sm font-medium rounded-full">
-                        <Star className="w-4 h-4 mr-1" />
-                        Featured
-                      </span>
-                    </div>
-
-                    {/* Action buttons overlay */}
-                    <div className="absolute top-4 right-4 flex gap-2">
-                      {project.githubUrl && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            window.open(project.githubUrl, '_blank', 'noopener,noreferrer');
-                          }}
-                          className="p-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors"
-                        >
-                          <Github className="w-5 h-5" />
-                        </button>
-                      )}
-                      {project.liveUrl && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            window.open(project.liveUrl, '_blank', 'noopener,noreferrer');
-                          }}
-                          className="p-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-colors"
-                        >
-                          <ExternalLink className="w-5 h-5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Project Content */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                      {project.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
-                      {project.description}
-                    </p>
-
-                    {/* Technologies */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {parseTechnologies(project.technologies).slice(0, 4).map((tech) => (
-                        <span
-                          key={tech}
-                          className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                      {parseTechnologies(project.technologies).length > 4 && (
-                        <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-sm rounded-full">
-                          +{parseTechnologies(project.technologies).length - 4}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Meta info */}
-                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                      <span className="flex items-center">
-                        <Calendar className="w-4 h-4 mr-1" />
-                        {new Date(project.createdAt).toLocaleDateString()}
-                      </span>
-                      <span>By {project.author.displayName}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* All Projects Section */}
+      {/* Projects Section */}
       <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="animate-fade-in-up">
             <div className="text-center mb-12">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                All Projects
+                My Projects
               </h2>
               <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Explore my complete portfolio of projects across different technologies and domains
+                Explore my portfolio of projects across different technologies and domains
               </p>
             </div>
           </div>
@@ -271,7 +143,7 @@ export default function ProjectsPage() {
           {/* Filters */}
           <div className="animate-fade-in-up animation-delay-200">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Search */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -297,18 +169,6 @@ export default function ProjectsPage() {
                     </option>
                   ))}
                 </select>
-
-                {/* Featured Filter */}
-                <label className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={showFeaturedOnly}
-                    onChange={(e) => setShowFeaturedOnly(e.target.checked)}
-                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 mr-2"
-                  />
-                  <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                  <span className="text-gray-700 dark:text-gray-300">Featured Only</span>
-                </label>
               </div>
             </div>
           </div>
@@ -387,16 +247,6 @@ export default function ProjectsPage() {
                             )}
                           </div>
                         </div>
-
-                        {/* Featured badge */}
-                        {project.featured && (
-                          <div className="absolute top-3 left-3">
-                            <span className="inline-flex items-center px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 text-xs font-medium rounded-full">
-                              <Star className="w-3 h-3 mr-1" />
-                              Featured
-                            </span>
-                          </div>
-                        )}
                       </div>
 
                       {/* Project Content */}
@@ -449,17 +299,16 @@ export default function ProjectsPage() {
                 No projects found
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                {searchTerm || selectedTech || showFeaturedOnly
+                {searchTerm || selectedTech
                   ? 'Try adjusting your search or filter criteria.'
                   : 'No projects available at the moment.'
                 }
               </p>
-              {(searchTerm || selectedTech || showFeaturedOnly) && (
+              {(searchTerm || selectedTech) && (
                 <button
                   onClick={() => {
                     setSearchTerm('');
                     setSelectedTech('');
-                    setShowFeaturedOnly(false);
                   }}
                   className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
                 >
