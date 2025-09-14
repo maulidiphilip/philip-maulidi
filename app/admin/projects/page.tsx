@@ -10,10 +10,11 @@ import {
   ExternalLink,
   Github,
   Star,
-  Calendar
+  Calendar,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import ImageUpload from '@/components/ImageUpload';
 
 interface Project {
   id: string;
@@ -28,11 +29,18 @@ interface Project {
   published: boolean;
   createdAt: string;
   updatedAt: string;
+  author: {
+    id: string;
+    displayName: string;
+    email: string;
+  };
 }
 
 export default function AdminProjectsPage() {
+  const { isAdmin, loading: authLoading } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -47,33 +55,54 @@ export default function AdminProjectsPage() {
     githubUrl: '',
     liveUrl: '',
     featured: false,
-    published: false
+    published: false,
   });
   const [techInput, setTechInput] = useState('');
 
-  const fetchProjects = async () => {
-    try {
-      const response = await fetch('/api/projects?published=false');
-      if (response.ok) {
-        const data = await response.json();
-        setProjects(data);
-      }
-    } catch {
-      console.error('Error fetching projects:');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    if (authLoading) return;
 
-  const filteredProjects = projects.filter(project => {
-    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    if (!isAdmin) return;
+
+    const fetchProjects = async () => {
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('auth-token='))
+          ?.split('=')[1];
+
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch('/api/projects', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProjects(data);
+        } else {
+          throw new Error('Failed to fetch projects');
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [authLoading, isAdmin]);
+
+  const filteredProjects = projects.filter((project) => {
+    const matchesSearch =
+      project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' ||
+    const matchesStatus =
+      statusFilter === 'all' ||
       (statusFilter === 'published' && project.published) ||
       (statusFilter === 'draft' && !project.published);
 
@@ -86,24 +115,29 @@ export default function AdminProjectsPage() {
     try {
       const token = document.cookie
         .split('; ')
-        .find(row => row.startsWith('auth-token='))
+        .find((row) => row.startsWith('auth-token='))
         ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       const response = await fetch(`/api/projects/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (response.ok) {
-        setProjects(projects.filter(p => p.id !== id));
+        setProjects(projects.filter((p) => p.id !== id));
+        setErrorMessage('');
       } else {
-        alert('Failed to delete project');
+        throw new Error('Failed to delete project');
       }
-    } catch {
-      console.error('Error deleting project:');
-      alert('Error deleting project');
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete project');
     }
   };
 
@@ -111,39 +145,52 @@ export default function AdminProjectsPage() {
     try {
       const token = document.cookie
         .split('; ')
-        .find(row => row.startsWith('auth-token='))
+        .find((row) => row.startsWith('auth-token='))
         ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       const response = await fetch(`/api/projects/${project.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           ...project,
+          technologies: JSON.stringify(
+            typeof project.technologies === 'string'
+              ? JSON.parse(project.technologies || '[]')
+              : project.technologies || []
+          ),
           [field]: !project[field],
         }),
       });
 
       if (response.ok) {
         const updatedProject = await response.json();
-        setProjects(projects.map(p => p.id === project.id ? updatedProject : p));
+        setProjects(projects.map((p) => (p.id === project.id ? updatedProject : p)));
+        setErrorMessage('');
+      } else {
+        throw new Error(`Failed to update ${field}`);
       }
-    } catch {
-      console.error(`Error updating ${field}:`);
+    } catch (error) {
+      console.error(`Error updating ${field}:`, error);
+      setErrorMessage(error instanceof Error ? error.message : `Error updating ${field}`);
     }
   };
 
   const addTechnology = () => {
-    if (techInput.trim() !== '') {
-      setFormData(prev => ({ ...prev, technologies: [...prev.technologies, techInput.trim()] }));
+    if (techInput.trim() !== '' && !formData.technologies.includes(techInput.trim())) {
+      setFormData((prev) => ({ ...prev, technologies: [...prev.technologies, techInput.trim()] }));
       setTechInput('');
     }
   };
 
   const removeTechnology = (tech: string) => {
-    setFormData(prev => ({ ...prev, technologies: prev.technologies.filter(t => t !== tech) }));
+    setFormData((prev) => ({ ...prev, technologies: prev.technologies.filter((t) => t !== tech) }));
   };
 
   const resetForm = () => {
@@ -152,28 +199,36 @@ export default function AdminProjectsPage() {
       description: '',
       content: '',
       image: '',
-      technologies: [] as string[],
+      technologies: [],
       githubUrl: '',
       liveUrl: '',
       featured: false,
-      published: false
+      published: false,
     });
+    setTechInput('');
   };
 
   const handleCreate = async () => {
     try {
       const token = document.cookie
         .split('; ')
-        .find(row => row.startsWith('auth-token='))
+        .find((row) => row.startsWith('auth-token='))
         ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       const response = await fetch('/api/projects', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          technologies: JSON.stringify(formData.technologies),
+        }),
       });
 
       if (response.ok) {
@@ -181,12 +236,13 @@ export default function AdminProjectsPage() {
         setProjects([...projects, newProject]);
         setShowCreateModal(false);
         resetForm();
+        setErrorMessage('');
       } else {
-        alert('Failed to create project');
+        throw new Error('Failed to create project');
       }
-    } catch {
-      console.error('Error creating project:');
-      alert('Error creating project');
+    } catch (error) {
+      console.error('Error creating project:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to create project');
     }
   };
 
@@ -196,32 +252,63 @@ export default function AdminProjectsPage() {
     try {
       const token = document.cookie
         .split('; ')
-        .find(row => row.startsWith('auth-token='))
+        .find((row) => row.startsWith('auth-token='))
         ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       const response = await fetch(`/api/projects/${editingProject.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          technologies: JSON.stringify(formData.technologies),
+        }),
       });
 
       if (response.ok) {
         const updatedProject = await response.json();
-        setProjects(projects.map(p => p.id === editingProject.id ? updatedProject : p));
+        setProjects(projects.map((p) => (p.id === editingProject.id ? updatedProject : p)));
         setShowEditModal(false);
         setEditingProject(null);
         resetForm();
+        setErrorMessage('');
       } else {
-        alert('Failed to update project');
+        throw new Error('Failed to update project');
       }
-    } catch {
-      console.error('Error updating project:');
-      alert('Error updating project');
+    } catch (error) {
+      console.error('Error updating project:', error);
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to update project');
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="p-6 text-center">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Unauthorized</h1>
+        <p className="text-gray-600 dark:text-gray-400">You do not have permission to access this page.</p>
+        <Link
+          href="/"
+          className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Return to Home
+        </Link>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -232,8 +319,14 @@ export default function AdminProjectsPage() {
   }
 
   return (
-    <>
     <div className="p-6 space-y-6">
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg">
+          {errorMessage}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -299,14 +392,12 @@ export default function AdminProjectsPage() {
               {filteredProjects.map((project) => {
                 let technologies: string[] = [];
                 try {
-                  // Try to parse as JSON first
                   technologies = JSON.parse(project.technologies || '[]');
                 } catch {
-                  // If JSON parsing fails, check if it's already an array or treat as comma-separated string
                   if (Array.isArray(project.technologies)) {
                     technologies = project.technologies;
                   } else if (typeof project.technologies === 'string') {
-                    technologies = project.technologies.split(',').map(tech => tech.trim());
+                    technologies = project.technologies.split(',').map((tech) => tech.trim());
                   } else {
                     technologies = [];
                   }
@@ -325,7 +416,7 @@ export default function AdminProjectsPage() {
                             />
                           </div>
                         )}
-                        <div>
+                        <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {project.title}
                           </div>
@@ -339,10 +430,11 @@ export default function AdminProjectsPage() {
                       <div className="flex flex-col space-y-1">
                         <button
                           onClick={() => toggleStatus(project, 'published')}
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${project.published
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            project.published
                               ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                               : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                            }`}
+                          }`}
                         >
                           {project.published ? 'Published' : 'Draft'}
                         </button>
@@ -397,13 +489,14 @@ export default function AdminProjectsPage() {
                               description: project.description,
                               content: project.content || '',
                               image: project.image || '',
-                              technologies: typeof project.technologies === 'string'
-                                ? JSON.parse(project.technologies || '[]')
-                                : project.technologies || [],
+                              technologies:
+                                typeof project.technologies === 'string'
+                                  ? JSON.parse(project.technologies || '[]')
+                                  : project.technologies || [],
                               githubUrl: project.githubUrl || '',
                               liveUrl: project.liveUrl || '',
                               featured: project.featured,
-                              published: project.published
+                              published: project.published,
                             });
                           }}
                           className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
@@ -451,364 +544,357 @@ export default function AdminProjectsPage() {
           </div>
         )}
       </div>
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Create New Project</h2>
+
+              <div className="space-y-4">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Content */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Detailed Content
+                  </label>
+                  <textarea
+                    rows={6}
+                    value={formData.content}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Image
+                  </label>
+                  <ImageUpload
+                    value={formData.image}
+                    onChange={(value) => setFormData((prev) => ({ ...prev, image: value }))}
+                  />
+                </div>
+
+                {/* Technologies */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Technologies
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={techInput}
+                      onChange={(e) => setTechInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
+                      placeholder="Add technology..."
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={addTechnology}
+                      className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.technologies.map((tech) => (
+                      <span
+                        key={tech}
+                        className="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
+                      >
+                        {tech}
+                        <button
+                          type="button"
+                          onClick={() => removeTechnology(tech)}
+                          className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* URLs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      GitHub URL
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.githubUrl}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, githubUrl: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Live URL
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.liveUrl}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, liveUrl: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Checkboxes */}
+                <div className="flex gap-6">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.featured}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, featured: e.target.checked }))}
+                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Featured</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.published}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, published: e.target.checked }))}
+                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Published</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    resetForm();
+                    setErrorMessage('');
+                  }}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreate}
+                  disabled={!formData.title || !formData.description}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Create Project
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Edit Project</h2>
+
+              <div className="space-y-4">
+                {/* Title */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Content */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Detailed Content
+                  </label>
+                  <textarea
+                    rows={6}
+                    value={formData.content}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  />
+                </div>
+
+                {/* Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Image
+                  </label>
+                  <ImageUpload
+                    value={formData.image}
+                    onChange={(value) => setFormData((prev) => ({ ...prev, image: value }))}
+                  />
+                </div>
+
+                {/* Technologies */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Technologies
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={techInput}
+                      onChange={(e) => setTechInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
+                      placeholder="Add technology..."
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={addTechnology}
+                      className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {formData.technologies.map((tech) => (
+                      <span
+                        key={tech}
+                        className="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
+                      >
+                        {tech}
+                        <button
+                          type="button"
+                          onClick={() => removeTechnology(tech)}
+                          className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* URLs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      GitHub URL
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.githubUrl}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, githubUrl: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Live URL
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.liveUrl}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, liveUrl: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Checkboxes */}
+                <div className="flex gap-6">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.featured}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, featured: e.target.checked }))}
+                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Featured</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.published}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, published: e.target.checked }))}
+                      className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Published</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingProject(null);
+                    resetForm();
+                    setErrorMessage('');
+                  }}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEdit}
+                  disabled={!formData.title || !formData.description}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Update Project
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-
-    {/* Create Modal */ }
-  {
-    showCreateModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Create New Project</h2>
-
-            <div className="space-y-4">
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              {/* Content */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Detailed Content
-                </label>
-                <textarea
-                  rows={6}
-                  value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              {/* Image URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Image URL
-                </label>
-                <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              {/* Technologies */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Technologies
-                </label>
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={techInput}
-                    onChange={(e) => setTechInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
-                    placeholder="Add technology..."
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                  <button
-                    type="button"
-                    onClick={addTechnology}
-                    className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                  >
-                    Add
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {formData.technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
-                    >
-                      {tech}
-                      <button
-                        type="button"
-                        onClick={() => removeTechnology(tech)}
-                        className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* URLs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    GitHub URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.githubUrl}
-                    onChange={(e) => setFormData(prev => ({ ...prev, githubUrl: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Live URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.liveUrl}
-                    onChange={(e) => setFormData(prev => ({ ...prev, liveUrl: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Checkboxes */}
-              <div className="flex gap-6">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.featured}
-                    onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
-                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Featured</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.published}
-                    onChange={(e) => setFormData(prev => ({ ...prev, published: e.target.checked }))}
-                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Published</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowCreateModal(false);
-                  resetForm();
-                }}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreate}
-                disabled={!formData.title || !formData.description}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Create Project
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  {/* Edit Modal */ }
-  {
-    showEditModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Edit Project</h2>
-
-            <div className="space-y-4">
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Title *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Description *
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              {/* Content */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Detailed Content
-                </label>
-                <textarea
-                  rows={6}
-                  value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              {/* Image URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Image URL
-                </label>
-                <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-
-              {/* Technologies */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Technologies
-                </label>
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={techInput}
-                    onChange={(e) => setTechInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
-                    placeholder="Add technology..."
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                  <button
-                    type="button"
-                    onClick={addTechnology}
-                    className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-                  >
-                    Add
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {formData.technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
-                    >
-                      {tech}
-                      <button
-                        type="button"
-                        onClick={() => removeTechnology(tech)}
-                        className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* URLs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    GitHub URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.githubUrl}
-                    onChange={(e) => setFormData(prev => ({ ...prev, githubUrl: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Live URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.liveUrl}
-                    onChange={(e) => setFormData(prev => ({ ...prev, liveUrl: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Checkboxes */}
-              <div className="flex gap-6">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.featured}
-                    onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
-                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Featured</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.published}
-                    onChange={(e) => setFormData(prev => ({ ...prev, published: e.target.checked }))}
-                    className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Published</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingProject(null);
-                  resetForm();
-                }}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEdit}
-                disabled={!formData.title || !formData.description}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Update Project
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-  </>
   );
 }

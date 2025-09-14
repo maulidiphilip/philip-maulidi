@@ -1,21 +1,23 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Trash2, 
-  Github, 
-  ExternalLink, 
-  Calendar, 
-  Tag, 
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Github,
+  ExternalLink,
+  Calendar,
+  Tag,
   Star,
   Eye,
   Save,
-  X
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import ImageUpload from '@/components/ImageUpload';
 
 interface Project {
   id: string;
@@ -30,11 +32,17 @@ interface Project {
   published: boolean;
   createdAt: string;
   updatedAt: string;
+  author: {
+    id: string;
+    displayName: string;
+    email: string;
+  };
 }
 
 export default function AdminProjectDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { isAdmin, loading: authLoading } = useAuth();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -50,21 +58,33 @@ export default function AdminProjectDetailPage() {
     published: false,
   });
   const [techInput, setTechInput] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!isAdmin) {
+      router.push('/admin/projects');
+      return;
+    }
+
     const fetchProject = async () => {
       try {
         const token = document.cookie
           .split('; ')
-          .find(row => row.startsWith('auth-token='))
+          .find((row) => row.startsWith('auth-token='))
           ?.split('=')[1];
+
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
 
         const response = await fetch(`/api/projects/${params.id}`, {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           setProject(data);
@@ -72,7 +92,7 @@ export default function AdminProjectDetailPage() {
           if (typeof data.technologies === 'string') {
             try {
               technologies = JSON.parse(data.technologies);
-            } catch (_error) {
+            } catch (error) {
               technologies = data.technologies.split(',').map((tech: string) => tech.trim());
             }
           } else if (Array.isArray(data.technologies)) {
@@ -92,11 +112,10 @@ export default function AdminProjectDetailPage() {
             published: data.published,
           });
         } else {
-          console.error('Project not found');
+          throw new Error('Project not found');
         }
       } catch (error) {
         console.error('Error fetching project:', error);
-      } finally {
         setLoading(false);
       }
     };
@@ -104,23 +123,27 @@ export default function AdminProjectDetailPage() {
     if (params.id) {
       fetchProject();
     } else {
-      console.error('Access denied');
+      setErrorMessage('Invalid project ID');
       setLoading(false);
     }
-  }, [params.id]);
+  }, [params.id, isAdmin, authLoading, router]);
 
   const handleUpdate = async () => {
     try {
       const token = document.cookie
         .split('; ')
-        .find(row => row.startsWith('auth-token='))
+        .find((row) => row.startsWith('auth-token='))
         ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       const response = await fetch(`/api/projects/${params.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           ...formData,
@@ -132,58 +155,92 @@ export default function AdminProjectDetailPage() {
         const updatedProject = await response.json();
         setProject(updatedProject);
         setIsEditing(false);
+        setErrorMessage('');
       } else {
-        alert('Failed to update project');
+        throw new Error('Failed to update project');
       }
     } catch (error) {
       console.error('Error updating project:', error);
-      alert('Error updating project');
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to update project');
+    } finally {
+      setIsEditing(false);
     }
   };
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this project?')) return;
-    
+
     try {
       const token = document.cookie
         .split('; ')
-        .find(row => row.startsWith('auth-token='))
+        .find((row) => row.startsWith('auth-token='))
         ?.split('=')[1];
+
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
 
       const response = await fetch(`/api/projects/${params.id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (response.ok) {
         router.push('/admin/projects');
       } else {
-        alert('Failed to delete project');
+        throw new Error('Failed to delete project');
       }
     } catch (error) {
       console.error('Error deleting project:', error);
-      alert('Error deleting project');
+      alert(error instanceof Error ? error.message : 'Failed to delete project');
     }
   };
 
   const addTechnology = () => {
     if (techInput.trim() && !formData.technologies.includes(techInput.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        technologies: [...prev.technologies, techInput.trim()]
+        technologies: [...prev.technologies, techInput.trim()],
       }));
       setTechInput('');
     }
   };
 
   const removeTechnology = (tech: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      technologies: prev.technologies.filter(t => t !== tech)
+      technologies: prev.technologies.filter((t) => t !== tech),
     }));
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="p-6 text-center">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          Unauthorized
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          You do not have permission to access this page.
+        </p>
+        <Link
+          href="/"
+          className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Return to Home
+        </Link>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -193,12 +250,12 @@ export default function AdminProjectDetailPage() {
     );
   }
 
-  if (!project) {
+  if (!project || errorMessage) {
     return (
       <div className="p-6">
         <div className="text-center py-12">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Project Not Found
+            {errorMessage || 'Project Not Found'}
           </h1>
           <Link
             href="/admin/projects"
@@ -212,10 +269,29 @@ export default function AdminProjectDetailPage() {
     );
   }
 
-  const technologies = typeof project.technologies === 'string' ? JSON.parse(project.technologies) : project.technologies;
+  const technologies = project?.technologies
+    ? (typeof project.technologies === 'string'
+        ? (() => {
+            try {
+              return JSON.parse(project.technologies);
+            } catch {
+              return project.technologies.split(',').map((tech: string) => tech.trim());
+            }
+          })()
+        : Array.isArray(project.technologies)
+          ? project.technologies
+          : [])
+    : [];
 
   return (
     <div className="p-6 space-y-6">
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-4 rounded-lg">
+          {errorMessage}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center space-x-4">
@@ -227,7 +303,7 @@ export default function AdminProjectDetailPage() {
             Back to Projects
           </Link>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {project.liveUrl && (
             <a
@@ -240,7 +316,7 @@ export default function AdminProjectDetailPage() {
               View Live
             </a>
           )}
-          
+
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
@@ -259,7 +335,10 @@ export default function AdminProjectDetailPage() {
                 Save Changes
               </button>
               <button
-                onClick={() => setIsEditing(false)}
+                onClick={() => {
+                  setIsEditing(false);
+                  setErrorMessage('');
+                }}
                 className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
                 <X className="w-4 h-4 mr-2" />
@@ -267,7 +346,7 @@ export default function AdminProjectDetailPage() {
               </button>
             </div>
           )}
-          
+
           <button
             onClick={handleDelete}
             className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -291,24 +370,16 @@ export default function AdminProjectDetailPage() {
                 className="object-cover"
               />
             ) : isEditing ? (
-              <div className="p-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Image URL
-                </label>
-                <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder="Enter image URL"
-                />
-              </div>
+              <ImageUpload
+                value={formData.image}
+                onChange={(value) => setFormData((prev) => ({ ...prev, image: value }))}
+              />
             ) : (
               <div className="flex items-center justify-center h-full">
                 <span className="text-gray-400">No image</span>
               </div>
             )}
-            
+
             {/* Status badges */}
             <div className="absolute top-4 left-4 flex gap-2">
               {project.featured && (
@@ -317,11 +388,13 @@ export default function AdminProjectDetailPage() {
                   Featured
                 </span>
               )}
-              <span className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded-full ${
-                project.published 
-                  ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-              }`}>
+              <span
+                className={`inline-flex items-center px-3 py-1 text-sm font-medium rounded-full ${
+                  project.published
+                    ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                }`}
+              >
                 {project.published ? 'Published' : 'Draft'}
               </span>
             </div>
@@ -329,14 +402,14 @@ export default function AdminProjectDetailPage() {
         )}
 
         <div className="p-8">
-          {(!isEditing) ? (
+          {!isEditing ? (
             <>
               {/* View Mode */}
               <div className="mb-6">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
                   {project.title}
                 </h1>
-                
+
                 <div className="flex items-center text-gray-600 dark:text-gray-400 text-sm mb-4">
                   <Calendar className="w-4 h-4 mr-2" />
                   Created on {new Date(project.createdAt).toLocaleDateString()}
@@ -382,7 +455,7 @@ export default function AdminProjectDetailPage() {
                       GitHub Repository
                     </a>
                   )}
-                  
+
                   {project.liveUrl && (
                     <a
                       href={project.liveUrl}
@@ -424,7 +497,7 @@ export default function AdminProjectDetailPage() {
                     type="text"
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
@@ -438,7 +511,7 @@ export default function AdminProjectDetailPage() {
                     required
                     rows={3}
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
@@ -451,7 +524,7 @@ export default function AdminProjectDetailPage() {
                   <textarea
                     rows={8}
                     value={formData.content}
-                    onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
@@ -497,6 +570,17 @@ export default function AdminProjectDetailPage() {
                   </div>
                 </div>
 
+                {/* Image */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Image
+                  </label>
+                  <ImageUpload
+                    value={formData.image}
+                    onChange={(value) => setFormData((prev) => ({ ...prev, image: value }))}
+                  />
+                </div>
+
                 {/* URLs */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -506,7 +590,7 @@ export default function AdminProjectDetailPage() {
                     <input
                       type="url"
                       value={formData.githubUrl}
-                      onChange={(e) => setFormData(prev => ({ ...prev, githubUrl: e.target.value }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, githubUrl: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -517,7 +601,7 @@ export default function AdminProjectDetailPage() {
                     <input
                       type="url"
                       value={formData.liveUrl}
-                      onChange={(e) => setFormData(prev => ({ ...prev, liveUrl: e.target.value }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, liveUrl: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -529,7 +613,7 @@ export default function AdminProjectDetailPage() {
                     <input
                       type="checkbox"
                       checked={formData.featured}
-                      onChange={(e) => setFormData(prev => ({ ...prev, featured: e.target.checked }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, featured: e.target.checked }))}
                       className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Featured</span>
@@ -538,7 +622,7 @@ export default function AdminProjectDetailPage() {
                     <input
                       type="checkbox"
                       checked={formData.published}
-                      onChange={(e) => setFormData(prev => ({ ...prev, published: e.target.checked }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, published: e.target.checked }))}
                       className="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Published</span>

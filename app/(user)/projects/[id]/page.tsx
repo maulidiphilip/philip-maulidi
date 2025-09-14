@@ -34,14 +34,14 @@ export default function ProjectDetailPage() {
           // Only show published projects to users
           if (data.published) {
             setProject(data);
-          } else {
-            setLoading(false);
           }
+          // Always set loading to false after getting a response
+          setLoading(false);
         } else {
           setLoading(false);
         }
-      } catch {
-        console.error('Error fetching project:');
+      } catch (error) {
+        console.error('Error fetching project:', error);
         setLoading(false);
       }
     };

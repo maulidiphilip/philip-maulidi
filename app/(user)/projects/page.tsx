@@ -58,16 +58,33 @@ export default function ProjectsPage() {
     }
   };
 
+  // Helper function to safely parse technologies
+  const parseTechnologies = (technologies: string | string[] | unknown): string[] => {
+    if (Array.isArray(technologies)) {
+      return technologies;
+    }
+    if (typeof technologies === 'string') {
+      try {
+        const parsed = JSON.parse(technologies);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return technologies.split(',').map((tech: string) => tech.trim()).filter(Boolean);
+      }
+    }
+    return [];
+  };
+
   // Get all unique technologies from projects
   const allTechnologies = Array.from(
-    new Set(projects.flatMap(project => project.technologies))
+    new Set(projects.flatMap(project => parseTechnologies(project.technologies)))
   ).sort();
 
   const filteredProjects = projects.filter(project => {
+    const projectTech = parseTechnologies(project.technologies);
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesTech = !selectedTech || project.technologies.includes(selectedTech);
+    const matchesTech = !selectedTech || projectTech.includes(selectedTech);
     const matchesFeatured = !showFeaturedOnly || project.featured;
 
     return matchesSearch && matchesTech && matchesFeatured;
@@ -206,7 +223,7 @@ export default function ProjectsPage() {
 
                     {/* Technologies */}
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {project.technologies.slice(0, 4).map((tech) => (
+                      {parseTechnologies(project.technologies).slice(0, 4).map((tech) => (
                         <span
                           key={tech}
                           className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-sm rounded-full"
@@ -214,9 +231,9 @@ export default function ProjectsPage() {
                           {tech}
                         </span>
                       ))}
-                      {project.technologies.length > 4 && (
+                      {parseTechnologies(project.technologies).length > 4 && (
                         <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-sm rounded-full">
-                          +{project.technologies.length - 4}
+                          +{parseTechnologies(project.technologies).length - 4}
                         </span>
                       )}
                     </div>
@@ -318,10 +335,7 @@ export default function ProjectsPage() {
             <div className="animate-fade-in-up animation-delay-400">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredProjects.map((project) => {
-                  // Technologies are already parsed by the API
-                  const technologies: string[] = Array.isArray(project.technologies) 
-                    ? project.technologies 
-                    : [];
+                  const projectTech = parseTechnologies(project.technologies);
                   
                   return (
                     <Link
@@ -396,7 +410,7 @@ export default function ProjectsPage() {
 
                         {/* Technologies */}
                         <div className="flex flex-wrap gap-1 mb-4">
-                          {technologies.slice(0, 3).map((tech) => (
+                          {projectTech.slice(0, 3).map((tech) => (
                             <span
                               key={tech}
                               className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full"
@@ -404,9 +418,9 @@ export default function ProjectsPage() {
                               {tech}
                             </span>
                           ))}
-                          {technologies.length > 3 && (
+                          {projectTech.length > 3 && (
                             <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full">
-                              +{technologies.length - 3}
+                              +{projectTech.length - 3}
                             </span>
                           )}
                         </div>
