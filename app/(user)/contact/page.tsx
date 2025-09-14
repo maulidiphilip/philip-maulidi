@@ -78,7 +78,7 @@ export default function ContactPage() {
     {
       icon: Github,
       label: "GitHub",
-      href: "https://github.com/maulidi",
+      href: "https://github.com/maulidiphilip",
       color: "hover:text-gray-800 dark:hover:text-gray-200"
     },
     {
@@ -90,7 +90,7 @@ export default function ContactPage() {
     {
       icon: Twitter,
       label: "Twitter",
-      href: "https://twitter.com/maulidi_philip",
+      href: "https://x.com/Maulidiphilip",
       color: "hover:text-blue-400"
     }
   ];
