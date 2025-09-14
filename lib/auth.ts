@@ -11,6 +11,7 @@ export interface AuthUser {
   displayName: string;
   role: string;
   avatar?: string;
+  createdAt: Date;
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -62,6 +63,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
         displayName: true,
         role: true,
         avatar: true,
+        createdAt: true,
       },
     });
     
@@ -71,6 +73,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       displayName: user.displayName,
       role: user.role,
       avatar: user.avatar || undefined,
+      createdAt: user.createdAt,
     } : null;
   } catch {
     return null;
@@ -93,6 +96,7 @@ export async function createUser(email: string, password: string, displayName: s
       displayName: true,
       role: true,
       avatar: true,
+      createdAt: true,
     },
   });
 }
@@ -100,6 +104,15 @@ export async function createUser(email: string, password: string, displayName: s
 export async function authenticateUser(email: string, password: string): Promise<AuthUser | null> {
   const user = await prisma.user.findUnique({
     where: { email },
+    select: {
+      id: true,
+      email: true,
+      displayName: true,
+      role: true,
+      avatar: true,
+      password: true,
+      createdAt: true,
+    },
   });
   
   if (!user) return null;
@@ -113,5 +126,6 @@ export async function authenticateUser(email: string, password: string): Promise
     displayName: user.displayName,
     role: user.role,
     avatar: user.avatar || undefined,
+    createdAt: user.createdAt,
   };
 }

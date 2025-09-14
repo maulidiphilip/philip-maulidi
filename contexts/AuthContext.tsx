@@ -8,6 +8,7 @@ export interface AuthUser {
   displayName: string;
   role: string; 
   avatar?: string;
+  createdAt: Date;
 }
 
 interface AuthContextType {

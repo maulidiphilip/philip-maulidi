@@ -58,7 +58,7 @@ export default function AdminLayout({
 
   const handleSignOut = async () => {
     await signOut();
-    router.push('/login');
+    router.push('/'); // Redirect to homepage instead of login
   };
 
   // Show loading state

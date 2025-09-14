@@ -9,6 +9,7 @@ interface AuthUser {
   displayName: string;
   role: string;
   avatar: string | undefined;
+  createdAt: Date;
 }
 
 export async function POST(request: NextRequest) {
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
       displayName: user.displayName,
       role: user.role,
       avatar: user.avatar === null ? undefined : user.avatar, // Convert null to undefined
+      createdAt: user.createdAt,
     };
 
     const token = generateToken(authUser);
