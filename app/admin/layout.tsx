@@ -16,7 +16,8 @@ import {
   ChevronDown,
   Home,
   BarChart3,
-  Users
+  Users,
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -31,6 +32,7 @@ const sidebarItems: SidebarItem[] = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Projects', href: '/admin/projects', icon: FolderOpen },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
+  { name: 'Contacts', href: '/admin/contacts', icon: MessageSquare },
   { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, badge: 'Soon' },
   { name: 'Users', href: '/admin/users', icon: Users, badge: 'Soon' },
   { name: 'Settings', href: '/admin/settings', icon: Settings },

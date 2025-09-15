@@ -60,7 +60,7 @@ export default function HomePage() {
               {/* Social Links */}
               <div className="flex space-x-6 animate-fade-in-up animation-delay-1000">
                 <a
-                  href="https://github.com/yourusername"
+                  href="https://github.com/maulidiphilip"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -68,7 +68,7 @@ export default function HomePage() {
                   <Github className="w-6 h-6" />
                 </a>
                 <a
-                  href="https://linkedin.com/in/yourusername"
+                  href="https://linkedin.com/in/philip-maulidi"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -76,7 +76,7 @@ export default function HomePage() {
                   <Linkedin className="w-6 h-6" />
                 </a>
                 <a
-                  href="mailto:your.email@example.com"
+                  href="mailto:maulidiphilip@gmail.com"
                   className="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   <Mail className="w-6 h-6" />
@@ -112,12 +112,12 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center animate-fade-in-up">
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">5+</div>
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">3+</div>
               <div className="text-gray-600 dark:text-gray-400">Years Experience</div>
             </div>
             
             <div className="text-center animate-fade-in-up animation-delay-200">
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">20+</div>
+              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">10+</div>
               <div className="text-gray-600 dark:text-gray-400">Projects Completed</div>
             </div>
             

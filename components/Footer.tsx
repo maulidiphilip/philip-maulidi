@@ -39,7 +39,7 @@ export default function Footer() {
   const socialLinks = [
     {
       name: "GitHub",
-      href: "https://github.com/maulidi",
+      href: "https://github.com/maulidiphilip",
       icon: Github,
       color: "hover:text-gray-300"
     },
