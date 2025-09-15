@@ -70,7 +70,7 @@ export default function BlogPostPage() {
       const response = await fetch(`/api/blog/${postId}/comments`);
       if (response.ok) {
         const data = await response.json();
-        setComments(data);
+        setComments(data.comments || []);
       } else {
         console.error('Failed to fetch comments');
       }

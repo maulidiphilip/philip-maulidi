@@ -50,7 +50,7 @@ export default function AdminComments() {
       const response = await fetch(`/api/admin/comments?${params}`);
       if (response.ok) {
         const data = await response.json();
-        setComments(data);
+        setComments(data.comments || []);
       } else {
         console.error('Failed to fetch comments');
       }
@@ -98,7 +98,7 @@ export default function AdminComments() {
     }
   }, [comments]);
 
-  const filteredComments = comments.filter(comment => {
+  const filteredComments = (comments || []).filter(comment => {
     const matchesSearch = 
       comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
       comment.author.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
