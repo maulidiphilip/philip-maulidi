@@ -21,7 +21,7 @@ interface BlogPost {
   content: string;
   excerpt: string;
   tags: string[];
-  featuredImage: string;
+  image: string;
   published: boolean;
   createdAt: string;
   updatedAt: string;
@@ -254,10 +254,10 @@ export default function AdminBlog() {
                   </div>
 
                   {/* Featured Image */}
-                  {post.featuredImage && (
+                  {post.image && (
                     <div className="ml-6">
                       <Image
-                        src={post.featuredImage}
+                        src={post.image}
                         alt={post.title}
                         width={128}
                         height={96}

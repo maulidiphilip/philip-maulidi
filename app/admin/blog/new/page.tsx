@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Plus, X, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function NewBlogPost() {
   const router = useRouter();
@@ -14,8 +14,10 @@ export default function NewBlogPost() {
     content: '',
     excerpt: '',
     tags: [] as string[],
-    featuredImage: '',
+    image: '',
     published: false,
+    featured: false,
+    readTime: null as number | null,
   });
   const [newTag, setNewTag] = useState('');
 
@@ -98,65 +100,19 @@ export default function NewBlogPost() {
           className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Title and Status */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Post Title *
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter post title"
-                  required
-                />
-              </div>
-
-              <div className="flex items-center">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.published}
-                    onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  {formData.published ? (
-                    <Eye className="w-4 h-4 ml-2 mr-1 text-green-500" />
-                  ) : (
-                    <EyeOff className="w-4 h-4 ml-2 mr-1 text-yellow-500" />
-                  )}
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {formData.published ? 'Published' : 'Draft'}
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            {/* Featured Image */}
+            {/* Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Featured Image URL
+                Post Title *
               </label>
               <input
-                type="url"
-                value={formData.featuredImage}
-                onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
+                type="text"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="https://example.com/image.jpg"
+                placeholder="Enter post title"
+                required
               />
-              {formData.featuredImage && (
-                <div className="mt-3">
-                  <Image
-                    src={formData.featuredImage}
-                    alt="Featured image preview"
-                    width={400}
-                    height={200}
-                    className="w-full max-w-md h-48 object-cover rounded-lg"
-                  />
-                </div>
-              )}
             </div>
 
             {/* Excerpt */}
@@ -170,6 +126,17 @@ export default function NewBlogPost() {
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Brief summary of the post (optional)"
+              />
+            </div>
+
+            {/* Featured Image */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Featured Image
+              </label>
+              <ImageUpload
+                value={formData.image}
+                onChange={(url) => setFormData({ ...formData, image: url })}
               />
             </div>
 
@@ -229,6 +196,54 @@ export default function NewBlogPost() {
                     </button>
                   </span>
                 ))}
+              </div>
+            </div>
+
+            {/* Read Time */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Read Time (minutes)
+              </label>
+              <input
+                type="number"
+                min="1"
+                value={formData.readTime || ''}
+                onChange={(e) => setFormData({ ...formData, readTime: e.target.value ? parseInt(e.target.value) : null })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Estimated read time"
+              />
+            </div>
+
+            {/* Settings */}
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="published"
+                  checked={formData.published}
+                  onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="published" className="ml-2 flex items-center text-sm text-gray-700 dark:text-gray-300">
+                  {formData.published ? (
+                    <Eye className="w-4 h-4 mr-1 text-green-500" />
+                  ) : (
+                    <EyeOff className="w-4 h-4 mr-1 text-yellow-500" />
+                  )}
+                  {formData.published ? 'Published' : 'Draft'}
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="featured"
+                  checked={formData.featured}
+                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="featured" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                  Feature this post
+                </label>
               </div>
             </div>
 

@@ -11,8 +11,10 @@ interface BlogPost {
   content: string;
   excerpt: string;
   tags: string[];
-  featuredImage: string;
+  image: string;
   published: boolean;
+  featured: boolean;
+  readTime: number | null;
   createdAt: string;
   updatedAt: string;
   author: {
@@ -111,10 +113,10 @@ export default function BlogPage() {
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
                 {/* Featured Image */}
-                {post.featuredImage && (
+                {post.image && (
                   <div className="aspect-video relative overflow-hidden">
                     <Image
-                      src={post.featuredImage}
+                      src={post.image}
                       alt={post.title}
                       fill
                       className="object-cover hover:scale-105 transition-transform duration-300"
